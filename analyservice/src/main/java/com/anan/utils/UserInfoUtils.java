@@ -17,6 +17,11 @@ public class UserInfoUtils {
     private String registerTime;
     private String useType;
 
+
+    /**
+     *
+     * @param data 数据行
+     */
     public void userInfo(String data){
         String[] userInfos = data.split(",");
         userId = userInfos[0];

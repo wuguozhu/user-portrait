@@ -8,6 +8,14 @@ import org.bson.Document;
  */
 public class SinkMongoUtils {
 
+
+    /**
+     * key/value 数据类型插入mango
+     * @param database 数据库
+     * @param tableName 表名
+     * @param key
+     * @param values
+     */
     public static void SinkMongo(String database,
                                  String tableName,
                                  String key,
