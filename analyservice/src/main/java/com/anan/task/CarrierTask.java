@@ -5,6 +5,7 @@ import com.anan.entity.YearBase;
 import com.anan.map.CarrierMap;
 import com.anan.reduce.CarrierReduce;
 import com.anan.utils.MongoUtils;
+import com.anan.utils.SinkMongoUtils;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -39,21 +40,7 @@ public class CarrierTask {
             for (CarrierInfo carrierInfo : resultList) {
                 String carrier = carrierInfo.getCarrier();
                 Long count = carrierInfo.getCount();
-                //String tablename, String database, String yearbasetype
-                Document doc = MongoUtils.findByOne("carrierstatics", "portait", carrier);
-                if (doc == null) {
-                    doc = new Document();
-                    doc.put("info", carrier);
-                    doc.put("count", count);
-                } else {
-                    Long resultCount = doc.getLong("count");
-                    Long total = resultCount + count;
-
-                    doc.put("count",total);
-
-                }
-                MongoUtils.saveOrUpdateMongo("carrierstatics","portait",doc);
-
+                SinkMongoUtils.SinkMongo("portait","carrierstatics",carrier,count);
             }
             env.execute("carrier analy");
 

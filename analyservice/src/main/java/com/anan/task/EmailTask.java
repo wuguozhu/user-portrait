@@ -1,8 +1,10 @@
 package com.anan.task;
 
-import com.anan.entity.YearBase;
-import com.anan.map.YearBaseMap;
-import com.anan.reduce.YearBaseReduce;
+import com.anan.entity.CarrierInfo;
+import com.anan.entity.EmailInfo;
+import com.anan.map.CarrierMap;
+import com.anan.map.EmailMap;
+import com.anan.reduce.EmailReduce;
 import com.anan.utils.MongoUtils;
 import com.anan.utils.SinkMongoUtils;
 import org.apache.flink.api.java.DataSet;
@@ -14,10 +16,9 @@ import java.util.List;
 
 /**
  * @author wuguozhu
- * @date 2019/9/7
+ * @date 2019/9/8 19:52
  */
-
-public class YearBaseTask {
+public class EmailTask {
     public static void main(String[] args) {
         final ParameterTool params = ParameterTool.fromArgs(args);
 
@@ -30,22 +31,24 @@ public class YearBaseTask {
         // get input data
         DataSet<String> text = env.readTextFile(params.get("input"));
 
-        DataSet<YearBase> mapresult = text.map(new YearBaseMap());
+        DataSet<EmailInfo> resuleMap = text.map(new EmailMap());
+        DataSet<EmailInfo> reduceResult = resuleMap.groupBy("groupField").reduce(new EmailReduce());
 
-        DataSet<YearBase> reduceresult = mapresult.groupBy("groupfield").reduce(new YearBaseReduce());
         try {
-            List<YearBase> resultList = reduceresult.collect();
+            List<EmailInfo> resultList = reduceResult.collect();
 
-            for (YearBase yearBase : resultList) {
-                String yearType = yearBase.getYeartype();
-                Long count = yearBase.getCount();
-                SinkMongoUtils.SinkMongo("portait","yearbasestatics",yearType,count);
+            for (EmailInfo emailInfo : resultList) {
+                String carrier = emailInfo.getEmailType();
+                Long count = emailInfo.getCount();
+                SinkMongoUtils.SinkMongo("portait","emalistatics",carrier,count);
 
             }
-            env.execute("year base analy");
+            env.execute("email analy");
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 }
