@@ -27,6 +27,11 @@ public class OrderInfoUtils {
     private String num;
     private String userId;
 
+
+    /**
+     *
+     * @param s 数据
+     */
     public void orderInfo(String s) {
         String[] orderInfos = s.split(",");
         String id = orderInfos[0];
@@ -41,7 +46,7 @@ public class OrderInfoUtils {
         String totalAmount = orderInfos[9];
         String refundAmount = orderInfos[10];
         String num = orderInfos[11];
-        String userd = orderInfos[12];
+        String userId = orderInfos[12];
     }
 
     public String getId() {
