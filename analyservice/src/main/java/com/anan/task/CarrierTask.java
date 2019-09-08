@@ -1,22 +1,23 @@
 package com.anan.task;
 
+import com.anan.entity.CarrierInfo;
 import com.anan.entity.YearBase;
-import com.anan.map.YearBaseMap;
-import com.anan.reduce.YearBaseReduce;
+import com.anan.map.CarrierMap;
+import com.anan.reduce.CarrierReduce;
 import com.anan.utils.MongoUtils;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.bson.Document;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 
 /**
  * @author wuguozhu
- * @date 2019/9/7
+ * @date 2019/9/8 17:39
  */
-
-public class YearBaseTask {
+public class CarrierTask {
     public static void main(String[] args) {
         final ParameterTool params = ParameterTool.fromArgs(args);
 
@@ -29,20 +30,20 @@ public class YearBaseTask {
         // get input data
         DataSet<String> text = env.readTextFile(params.get("input"));
 
-        DataSet<YearBase> mapresult = text.map(new YearBaseMap());
+        DataSet<CarrierInfo> resuleMap = text.map(new CarrierMap());
 
-        DataSet<YearBase> reduceresult = mapresult.groupBy("groupfield").reduce(new YearBaseReduce());
+        DataSet<CarrierInfo> reduceResult = resuleMap.groupBy("groupfield").reduce(new CarrierReduce());
         try {
-            List<YearBase> resultList = reduceresult.collect();
+            List<CarrierInfo> resultList = reduceResult.collect();
 
-            for (YearBase yearBase : resultList) {
-                String yearType = yearBase.getYeartype();
-                Long count = yearBase.getCount();
+            for (CarrierInfo carrierInfo : resultList) {
+                String carrier = carrierInfo.getCarrier();
+                Long count = carrierInfo.getCount();
                 //String tablename, String database, String yearbasetype
-                Document doc = MongoUtils.findByOne("yearbasestatics", "portait", yearType);
+                Document doc = MongoUtils.findByOne("carrierstatics", "portait", carrier);
                 if (doc == null) {
                     doc = new Document();
-                    doc.put("yearbasetype", yearType);
+                    doc.put("info", carrier);
                     doc.put("count", count);
                 } else {
                     Long resultCount = doc.getLong("count");
@@ -51,10 +52,10 @@ public class YearBaseTask {
                     doc.put("count",total);
 
                 }
-                MongoUtils.saveOrUpdateMongo("yearbasestatics","portait",doc);
+                MongoUtils.saveOrUpdateMongo("carrierstatics","portait",doc);
 
             }
-            env.execute("year base");
+            env.execute("carrier analy");
 
         } catch (Exception e) {
             e.printStackTrace();
